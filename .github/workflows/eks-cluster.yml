@@ -17,7 +17,7 @@ defaults:
     working-directory: "terraform"
 jobs:
   provision_resource:
-    if: true
+    # if: false
     runs-on: ubuntu-latest
 
     steps:
@@ -36,36 +36,36 @@ jobs:
           aws-region: us-east-1
           role-to-assume: ${{ secrets.AWS_OIDC_ROLE_TO_ASSUME }}
 
-      - name: Test aws and tfvars
-        run: |
-          aws sts get-caller-identity
-          echo "${{ vars.TF_EKS_VARIABLES }}" > eks.auto.tfvars
-          cat eks.auto.tfvars
-      
-      # - name: terraform setup
-      #   uses: hashicorp/setup-terraform@v4
-
-      # - name: Create tfvars file
-      #   run: echo "${{ vars.TF_EKS_VARIABLES }}" > eks.auto.tfvars
-
-      # - name: initial terraform
-      #   run: terraform init
-
-      # - name: terraform plan
-      #   run: terraform plan -no-color
-
-      # - name: terraform apply
-      #   run: terraform apply -auto-approve
-
-      # - name: Send EC2 IP to Slack
+      # - name: Test aws and tfvars
       #   run: |
-      #     EKS_CLUSTER_NAME=$(terraform output -raw cluster_name)
-      #     curl -X POST --header "Content-Type: application/json" -d "{\"text\": \"EKS cluster $EKS_CLUSTER_NAME created!\"}" \
-      #     ${{ vars.SLACK_WEBHOOK_URL }}
+      #     aws sts get-caller-identity
+      #     echo "${{ vars.TF_EKS_VARIABLES }}" > eks.auto.tfvars
+      #     cat eks.auto.tfvars
+      
+      - name: terraform setup
+        uses: hashicorp/setup-terraform@v4
+
+      - name: Create tfvars file
+        run: echo "${{ vars.TF_EKS_VARIABLES }}" > eks.auto.tfvars
+
+      - name: initial terraform
+        run: terraform init
+
+      - name: terraform plan
+        run: terraform plan -no-color
+
+      - name: terraform apply
+        run: terraform apply -auto-approve
+
+      - name: Send EC2 IP to Slack
+        run: |
+          EKS_CLUSTER_NAME=$(terraform output -raw cluster_name)
+          curl -X POST --header "Content-Type: application/json" -d "{\"text\": \"EKS cluster $EKS_CLUSTER_NAME created!\"}" \
+          ${{ vars.SLACK_WEBHOOK_URL }}
 
   destroy_resources:
     runs-on: ubuntu-latest
-    # if: false
+    if: false
     steps:
       - name: checkout
         uses: actions/checkout@v5
