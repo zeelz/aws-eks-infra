@@ -46,7 +46,10 @@ jobs:
         uses: hashicorp/setup-terraform@v4
 
       - name: Create tfvars file
-        run: echo "${{ vars.TF_EKS_VARIABLES }}" > eks.auto.tfvars
+        run: |
+          cat << 'EOF' > eks.auto.tfvars
+          "${{ vars.TF_EKS_VARIABLES }}" 
+          EOF
 
       - name: initial terraform
         run: terraform init
