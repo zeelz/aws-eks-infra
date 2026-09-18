@@ -14,7 +14,7 @@ defaults:
     working-directory: "terraform"
 jobs:
   provision_resource:
-    # if: false
+    if: false
     runs-on: ubuntu-latest
 
     steps:
@@ -44,7 +44,7 @@ jobs:
       - name: terraform apply
         run: terraform apply -auto-approve
 
-      - name: Send EC2 IP to Slack
+      - name: Send EKS Cluster name to Slack
         run: |
           EKS_CLUSTER_NAME=$(terraform output -raw cluster_name)
           curl -X POST --header "Content-Type: application/json" -d "{\"text\": \"EKS cluster $EKS_CLUSTER_NAME created!\"}" \
@@ -52,7 +52,7 @@ jobs:
 
   destroy_resources:
     runs-on: ubuntu-latest
-    if: false
+    # if: false
     steps:
       - name: checkout
         uses: actions/checkout@v5
@@ -62,7 +62,6 @@ jobs:
           sparse-checkout: "terraform"
           sparse-checkout-cone-mode: false
 
-      # - name: Configure AWS Credentials # not needed for tf, just passed those cred as env vars
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v6.1.0
         with:
@@ -77,3 +76,9 @@ jobs:
 
       - name: terraform destroy
         run: terraform apply -destroy -auto-approve
+
+      - name: Send Delete confirmation to Slack
+        run: |
+          EKS_CLUSTER_NAME=$(terraform output -raw cluster_name)
+          curl -X POST --header "Content-Type: application/json" -d "{\"text\": \"EKS cluster $EKS_CLUSTER_NAME deleted!\"}" \
+          ${{ vars.SLACK_WEBHOOK_URL }}
