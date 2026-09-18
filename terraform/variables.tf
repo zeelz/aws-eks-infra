@@ -32,8 +32,3 @@ variable "node_group_role_arn" {
   description = "Existing EKS node group IAM role ARN"
   type        = string
 }
-
-variable "aws_profile" {
-  description = "aws profile"
-  type        = string 
-}
