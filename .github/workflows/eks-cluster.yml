@@ -9,9 +9,6 @@ permissions:
   id-token: write
   contents: read
 
-env: # TF_VAR_ values are auto injected into tf input variables 
-  TF_VAR_FOO: "bar"
-
 defaults:
   run:
     working-directory: "terraform"
@@ -29,27 +26,14 @@ jobs:
           sparse-checkout: "terraform"
           sparse-checkout-cone-mode: false
 
-      # - name: Configure AWS Credentials # not needed for tf, just passed those cred as env vars
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v6.1.0
         with:
           aws-region: us-east-1
           role-to-assume: ${{ secrets.AWS_OIDC_ROLE_TO_ASSUME }}
-
-      # - name: Test aws and tfvars
-      #   run: |
-      #     aws sts get-caller-identity
-      #     echo "${{ vars.TF_EKS_VARIABLES }}" > eks.auto.tfvars
-      #     cat eks.auto.tfvars
       
       - name: terraform setup
         uses: hashicorp/setup-terraform@v4
-
-      - name: Create tfvars file
-        run: |
-          cat << 'EOF' > eks.auto.tfvars
-          "${{ vars.TF_EKS_VARIABLES }}" 
-          EOF
 
       - name: initial terraform
         run: terraform init
